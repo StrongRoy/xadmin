@@ -1,6 +1,11 @@
 
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+import django
+if django.VERSION[0] == 1:
+    from django.core.urlresolvers import NoReverseMatch, reverse
+else:
+    from django.urls import NoReverseMatch, reverse
+
 from django.db import transaction
 from django.db.models import Q
 from django.forms import ModelChoiceField

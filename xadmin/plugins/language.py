@@ -21,6 +21,21 @@ class SetLangView(BaseAdminView):
             del request.session['nav_menu']
         return set_language(request)
 
-if settings.LANGUAGES and 'django.middleware.locale.LocaleMiddleware' in settings.MIDDLEWARE_CLASSES:
+
+# if settings.LANGUAGES and 'django.middleware.locale.LocaleMiddleware' in settings.MIDDLEWARE_CLASSES:
+
+# MIDDLEWARE = MIDDLEWARE_CLASSES
+a = 1
+b = 2
+h = ""
+
+h = a-b if a>b else a+b
+
+import django
+
+#Django 1.10 版本 更名为 MIDDLEWARE（单复同形），写法也有变化，详见 第四部分。
+# 如果用 Django 1.10版本开发，部署时用 Django 1.9版本或更低版本，要特别小心此处。
+MIDDLEWARE = settings.MIDDLEWARE_ClASSES if django.VERSION[0] ==1 and django.VERSION[1] <9 else settings.MIDDLEWARE
+if settings.LANGUAGES and 'django.middleware.locale.LocaleMiddleware' in MIDDLEWARE:
     site.register_plugin(SetLangNavPlugin, CommAdminView)
     site.register_view(r'^i18n/setlang/$', SetLangView, 'set_language')

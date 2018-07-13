@@ -1,7 +1,12 @@
 
 from django.template import loader
 from django.utils.text import capfirst
-from django.core.urlresolvers import reverse, NoReverseMatch
+import django
+if django.VERSION[0] == 1:
+    from django.core.urlresolvers import NoReverseMatch, reverse
+else:
+    from django.urls import NoReverseMatch, reverse
+
 from django.utils.translation import ugettext as _
 
 from xadmin.sites import site

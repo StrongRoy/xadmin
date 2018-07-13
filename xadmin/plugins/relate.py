@@ -1,7 +1,12 @@
 # coding=UTF-8
 from itertools import chain
 
-from django.core.urlresolvers import reverse
+import django
+if django.VERSION[0] == 1:
+    from django.core.urlresolvers import NoReverseMatch, reverse
+else:
+    from django.urls import NoReverseMatch, reverse
+
 from django.db.models.options import PROXY_PARENTS
 from django.utils import six
 from django.utils.encoding import force_text

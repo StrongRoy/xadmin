@@ -12,7 +12,13 @@ from django.contrib import messages
 from django.contrib.auth import get_permission_codename
 from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse
+# from django.core.urlresolvers import reverse
+import django
+if django.VERSION[0] == 1:
+    from django.core.urlresolvers import NoReverseMatch, reverse
+else:
+    from django.urls import reverse
+
 from django.http import HttpResponse
 from django.template import Context, Template
 from django.template.response import TemplateResponse

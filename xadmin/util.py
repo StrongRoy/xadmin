@@ -11,7 +11,11 @@ from django.utils.safestring import mark_safe
 from django.utils.text import capfirst
 from django.utils.encoding import force_text, smart_text, smart_str
 from django.utils.translation import ungettext
-from django.core.urlresolvers import reverse
+if django.VERSION[0] == 1:
+    from django.core.urlresolvers import NoReverseMatch, reverse
+else:
+    from django.urls import NoReverseMatch, reverse
+
 from django.conf import settings
 from django.forms import Media
 from django.utils.translation import get_language
@@ -83,17 +87,28 @@ def xstatic(*tags):
     return [f.startswith('http://') and f or static(f) for f in fs]
 
 
+# def vendor(*tags):
+#     media = Media()
+#     for tag in tags:
+#         file_type = tag.split('.')[-1]
+#         files = xstatic(tag)
+#         if file_type == 'js':
+#             media.add_js(files)
+#         elif file_type == 'css':
+#             media.add_css({'screen': files})
+#     return media
+
 def vendor(*tags):
-    media = Media()
+    css = {'screen': []}
+    js = []
     for tag in tags:
         file_type = tag.split('.')[-1]
         files = xstatic(tag)
         if file_type == 'js':
-            media.add_js(files)
+            js.extend(files)
         elif file_type == 'css':
-            media.add_css({'screen': files})
-    return media
-
+            css['screen'] += files
+    return Media(css=css, js=js)
 
 def lookup_needs_distinct(opts, lookup_path):
     """
@@ -101,8 +116,8 @@ def lookup_needs_distinct(opts, lookup_path):
     """
     field_name = lookup_path.split('__', 1)[0]
     field = opts.get_field(field_name)
-    if ((hasattr(field, 'rel') and
-         isinstance(field.rel, models.ManyToManyRel)) or
+    if ((hasattr(field, 'remote_field') and
+         isinstance(field.remote_field, models.ManyToManyRel)) or
         (is_related_field(field) and
          not field.field.unique)):
         return True
@@ -343,7 +358,7 @@ def display_for_field(value, field):
         return formats.number_format(value, field.decimal_places)
     elif isinstance(field, models.FloatField):
         return formats.number_format(value)
-    elif isinstance(field.rel, models.ManyToManyRel):
+    elif isinstance(field.remote_field, models.ManyToManyRel):
         return ', '.join([smart_text(obj) for obj in value.all()])
     else:
         return smart_text(value)
@@ -404,7 +419,7 @@ def reverse_field_path(model, path):
                 break
         if direct:
             related_name = field.related_query_name()
-            parent = field.rel.to
+            parent = field.remote_field.to
         else:
             related_name = field.field.name
             parent = field.model
