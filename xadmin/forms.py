@@ -39,8 +39,12 @@ class AdminAuthenticationForm(AuthenticationForm):
                         pass
                     else:
                         if user.check_password(password):
-                            message = _("Your e-mail address is not your username."
-                                        " Try '%s' instead.") % user.username
+                            if  user.is_active and user.is_staff :
+                                self.user_cache = user
+                                return self.cleaned_data
+                                # print(self.user_cache)
+                            # message = _("Your e-mail address is not your username."
+                            #             " Try '%s' instead.") % user.username
                 raise forms.ValidationError(message)
             elif not self.user_cache.is_active or not self.user_cache.is_staff:
                 raise forms.ValidationError(message)
